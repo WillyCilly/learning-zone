@@ -22,6 +22,14 @@
 #endif
 #endif
 //---------------------------USER-DEFINED---------------------------------------
+/** GEMM ranges from 1-4:
+GEMM=1: simple mm, 2d decompose.
+GEMM=2: tiling to local memory, 2d decompose.
+GEMM=3: copy/compute 8 elements per work-item,
+        tiling to local memory, 2d decompose.
+GEMM=4: copy/compute 8 elements per work-item,
+        tiling to local memory, then to private memory, 2d decompose.
+*******************************************************************************/ 
 #define GEMM   (4)
 #define SIZE_M (1024)
 #define SIZE_N (1024)

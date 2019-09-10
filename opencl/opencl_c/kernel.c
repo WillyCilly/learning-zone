@@ -8,6 +8,12 @@
 #include "CL/cl.h"
 #include "host_basics.h"
 
+
+/** Can calculate:
+VECTOR_ADD: vector add
+SIMPLEMM:   NxN matrix multiplication
+GEMM:       generic matrix multiplication
+************************************************/
 #define GEMM
 #define DEBUG
 
@@ -54,7 +60,7 @@ char *GetBuildOptions()
     return NULL;
   }
 #ifdef DEBUG
-  sprintf(debug_options, " -g -s \"HelloWorld.cl\"");
+  sprintf(debug_options, " -g -s \"kernel.cl\"");
 #endif
 
   char *build_options;
@@ -262,7 +268,7 @@ int main(){
   size_t param_size = sizeof(device_max_work_item_sizes);
   PrintDeviceInfo(device, device_max_work_item_dimensions, device_max_work_item_sizes, param_size);
   printf("INFO:Creating Program...\n");
-  char *knl_text = ReadKernelFile("HelloWorld.cl");
+  char *knl_text = ReadKernelFile("kernel.cl");
   program = CreateProgram(context, device, knl_text);
   if (program == NULL)
   {
