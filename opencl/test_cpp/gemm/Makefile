@@ -29,9 +29,9 @@ endif
 
 #CCFLAGS += -D DEVICE=$(DEVICE)
 
-gemm: gemm.cpp
+gemm.o: gemm.cpp
 	$(CPPC) $^ $(INC) $(CCFLAGS) $(LIBS) -o $@
 
 
 clean:
-	rm -f gemm
+	rm -f gemm.o

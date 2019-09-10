@@ -1,4 +1,4 @@
-EXECUTABLES = hello-world
+EXECUTABLES = hello-world.o
 all: $(EXECUTABLES)
 
 ifdef OPENCL_INC
@@ -15,4 +15,4 @@ hello-world: HelloWorld.c host_basics.c
 	gcc $(CL_CFLAGS) $(CL_LDFLAGS) -g -std=gnu99 -o$@ $^ -lOpenCL
 
 clean:
-	rm -f $(EXECUTABLES) *.o
+	rm -f $(EXECUTABLES)
