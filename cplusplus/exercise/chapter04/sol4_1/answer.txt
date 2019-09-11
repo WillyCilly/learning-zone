@@ -1,0 +1,11 @@
+The type of s.name.size() is std::string::size_type,
+while the type of maxlen is int.
+
+So the code will not work.
+
+Change it to:
+```
+std::string::size_type maxlen;
+Stduent_info s;
+max(s.name.size(), maxlen);
+```
