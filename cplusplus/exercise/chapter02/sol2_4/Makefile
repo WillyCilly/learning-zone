@@ -10,7 +10,7 @@ ifdef CXX_LIB
   LDFLAGS = -L$(CXX_LIB)
 endif
 
-frame: frame.cpp
+frame.o: frame.cpp
 	$(CXX) $^ $(CFLAGS) $(LDFLAGS) -std=c++11 -o$@
 
 clean:
