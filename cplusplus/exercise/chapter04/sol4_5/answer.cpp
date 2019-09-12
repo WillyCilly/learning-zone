@@ -12,6 +12,8 @@ istream& read_word(istream& input, vector<string>& word){
     while(input >> str){
       word.push_back(str);
     }
+    // clear the error state (like eof, or some input failure for the next input)
+    in.clear();
   }
   return input;
 }
