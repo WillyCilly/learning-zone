@@ -13,5 +13,8 @@ endif
 answer.o: answer.cpp
 	$(CXX) $^ $(CFLAGS) $(LDFLAGS) -std=c++11 -o$@
 
+test:		all
+	./answer.o < words.txt
+
 clean:
 	rm -f *.o

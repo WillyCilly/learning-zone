@@ -13,7 +13,7 @@ istream& read_word(istream& input, vector<string>& word){
       word.push_back(str);
     }
     // clear the error state (like eof, or some input failure for the next input)
-    in.clear();
+    input.clear();
   }
   return input;
 }
