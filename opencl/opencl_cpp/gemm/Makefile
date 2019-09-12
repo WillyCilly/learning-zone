@@ -3,7 +3,7 @@ ifndef CPPC
 	CPPC=g++
 endif
 
-CPP_COMMON = ../common
+CPP_COMMON = ../../common
 
 CCFLAGS=-std=c++11
 
