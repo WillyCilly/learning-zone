@@ -1,9 +1,5 @@
 #define __CL_ENABLE_EXCEPTIONS
 
-#include "cl.hpp"
-
-#include "err_code.h"
-
 #include <vector>
 #include <cstdio>
 #include <cstdlib>
@@ -13,7 +9,10 @@
 #include <iostream>
 #include <fstream>
 
+#include "cl.hpp"
+#include "err_code.h"
 // pick up device type from compiler command line or from the default type
+
 //#define USE_DEFAULT_DEVICE
 #ifdef USE_DEFAULT_DEVICE
 #ifndef DEVICE
@@ -22,20 +21,20 @@
 #endif
 
 //---------------------------USER-DEFINED---------------------------------------
-#define IN_DIM    (28*28)
-#define BATCH_NUM (32)
-#define CLASS_NUM (512)
+// Limitations:
+// 1. WORK_PER_THREAD has to be a factor of CLASS_NUM
+// 2. CLASS_NUM/WORK_PER_THREAD < 256
+#define BATCH_NUM (256)
+#define CLASS_NUM (1000)
+#define WORK_PER_THREAD (4)
 //-----------------------END OF USER-DEFINED------------------------------------
 
 // tolerance used in floating point comparisons
 #define TOL   (0.001)
-// layer0: fully connected layer
-// layer1: softmax(cross entropy)
-#define IN0   (BATCH_NUM*IN_DIM)
-#define W0    (IN_DIM*CLASS_NUM)
-#define B0    (CLASS_NUM)
-#define IN1   (BATCH_NUM*CLASS_NUM)
-#define OUT1  (BATCH_NUM*CLASS_NUM)
+
+// softmax(cross entropy)
+#define IN_SIZE   (BATCH_NUM*CLASS_NUM)
+#define OUT_SIZE  (BATCH_NUM*CLASS_NUM)
 
 int main(void)
 {
@@ -44,8 +43,8 @@ int main(void)
     //         are set as valid values.
 
     //1. Initialize input/output vectors
-    std::vector<float> h_in  (IN1);                // input vector
-    std::vector<float> h_out (OUT1, 0xdeadbeef);   // output vector
+    std::vector<float> h_in  (IN_SIZE);                // input vector
+    std::vector<float> h_out (OUT_SIZE, 0x0);   // output vector
 
     cl::Buffer d_in;                        // device memory used for the input  a vector
     cl::Buffer d_out;                        // device memory used for the output c vector
@@ -122,7 +121,8 @@ int main(void)
         }
         std::string kernel_str = std::string(std::istreambuf_iterator<char>(stream), (std::istreambuf_iterator<char>()));
         cl::Program program(context, kernel_str, false);
-        std::string build_options =  "-DCLASS_NUM=" + std::to_string(CLASS_NUM);
+        std::string build_options =  "-DCLASS_NUM=" + std::to_string(CLASS_NUM)
+                                  + " -DWORK_PER_THREAD=" + std::to_string(WORK_PER_THREAD);
         std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
         try
         {
@@ -154,14 +154,14 @@ int main(void)
         auto softmax = cl::make_kernel<cl::Buffer, cl::Buffer>(program, "softmax");
 
         d_in   = cl::Buffer(context, begin(h_in), end(h_in), true);
-        d_out  = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * OUT1);
+        d_out  = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * OUT_SIZE);
 
         cl::Event softmax_event;
         softmax_event = softmax(
             cl::EnqueueArgs(
                 queue
-                ,cl::NDRange(OUT1/2)      // each thread computes 2 outputs
-                ,cl::NDRange(CLASS_NUM/2)   // CLASS_NUM outputs per thread-groups
+                ,cl::NDRange(OUT_SIZE/WORK_PER_THREAD)   // each thread computes WORK_PER_THREAD outputs
+                ,cl::NDRange(CLASS_NUM/WORK_PER_THREAD)  // CLASS_NUM outputs per thread-groups
             ),
             d_in,
             d_out);
@@ -176,7 +176,7 @@ int main(void)
 
         cl::copy(queue, d_out, begin(h_out), end(h_out));
 
-        std::vector<float> output (OUT1, 0xdeadbeef);   // serial model output
+        std::vector<float> output (OUT_SIZE, 0x0);   // serial model output
         float tmp[CLASS_NUM], sum;
 
         clock_t serial_start, serial_end;
@@ -228,7 +228,7 @@ int main(void)
         printf(
             "calculate softmax:  %d out of %d results were correct.\n",
             correct,
-            OUT1);
+            OUT_SIZE);
     }
     catch (cl::Error err) {
         std::cout << "Exception\n";
@@ -236,4 +236,5 @@ int main(void)
             << "ERROR: " << err.what() << "(" << err_code(err.err()) << ")"
             << std::endl;
     }
+    return 0;
 }
