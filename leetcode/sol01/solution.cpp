@@ -82,9 +82,9 @@ int main(){
   int max_count;
   max_count = solution.lengthOfLongestSubstring("au");
   cout << max_count << endl;
-  max_count = solution.lengthOfLongestSubstring("au");
+  max_count = solution.lengthOfLongestSubstring("aba");
   cout << max_count << endl;
-  max_count = solution.lengthOfLongestSubstring("au");
+  max_count = solution.lengthOfLongestSubstring("gewwwweli");
   cout << max_count << endl;
   return 0;
 }
